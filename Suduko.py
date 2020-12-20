@@ -4,6 +4,9 @@ from pygame.constants import RESIZABLE
 
 boardImg = pygame.image.load("SudokuBoard900.jpg")
 boardImg = pygame.transform.scale(boardImg, (600, 600))
+
+white = (255,255,255)
+
 class GridSquare():
     def __init__(self, pos, num):
         self.pos = pos
@@ -19,10 +22,13 @@ class GridSquare():
     def setNum(self, num):
         self.num = num
 
+    def setSelect(self, state):
+        self.selected = state
+
     def __str__(self):
         return str(self.num)
 
-class Board():
+class Suduko():
     def __init__(self, board):
         self.boardState = []
         for row in range(len(board)):
@@ -46,19 +52,23 @@ class Board():
     def getSquare(self, pos):
         return self.boardState[pos[0]][pos[1]]
 
+    def selectSquare(self, pos):
+        self.getSquare(pos).setSelect(True)
+
 
 
 class SudukoGUI():
-    def __init__(self, board):
+    def __init__(self, suduko):
         pygame.init()
         self.running = True
-        self.board = board
+        self.board = suduko
         self.windowSize = (900, 600)
         self.boardWidth = 600
         self.boardHeight = 600
         self.screen = pygame.display.set_mode(self.windowSize)
         self.screen.blit(boardImg, (0,0))
         self.font = pygame.font.Font('freesansbold.ttf', 50)
+        self.focusSquare = (0,0)
         pygame.display.update()
         self.startGame()
 
@@ -72,15 +82,12 @@ class SudukoGUI():
     def drawSquare(self, gridSquare):
         #Number to be drawn
         square = self.font.render(str(gridSquare.getNum()), False, (0,0,0))
-        print(gridSquare.getPos()[0])
-        print(gridSquare.getPos()[1])
-        print(self.windowSize[0]/3)
         boardWidth = self.windowSize[0]-(self.windowSize[0]/3)
         boardHeight = self.windowSize[1]
         xPos = boardWidth/9 * gridSquare.getPos()[1]
         yPos = boardHeight/9 * gridSquare.getPos()[0]
-        self.screen.blit(square, (xPos, yPos))
-        
+        self.screen.blit(square, (yPos, xPos))
+        pygame.display.update()
         
 
     def startGame(self):
@@ -89,54 +96,22 @@ class SudukoGUI():
                 if event.type == pygame.QUIT:
                     self.running = False
                 elif event.type == pygame.KEYDOWN:
+                    self.board.setSquare(self.focusSquare, pygame.key.name(event.key))
                     self.drawBoard()
                 elif event.type == pygame.MOUSEBUTTONDOWN:
                     pos = pygame.mouse.get_pos()
-                    print(pos)
-                    row = -1
-                    col = -1
-                    if pos[0] < self.boardWidth/9:
-                        col = 0
-                    elif pos[0] >= self.boardWidth/9 * 1 and pos[0]  < self.boardWidth/9 *2:
-                        col = 1
-                    elif pos[0] >= self.boardWidth/9 * 2 and pos[0]  < self.boardWidth/9 *3:
-                        col = 2
-                    elif pos[0] >= self.boardWidth/9 * 3 and pos[0]  < self.boardWidth/9 *4:
-                        col = 3
-                    elif pos[0] >= self.boardWidth/9 * 4 and pos[0]  < self.boardWidth/9 *5:
-                        col = 4
-                    elif pos[0] >=self.boardWidth/9 * 5 and pos[0]  < self.boardWidth/9 *6:
-                        col = 5
-                    elif pos[0] >= self.boardWidth/9 * 1 and pos[0]  < self.boardWidth/9 *7:
-                        col = 6
-                    elif pos[0] >= self.boardWidth/9 * 7 and pos[0]  < self.boardWidth/9 *8:
-                        col = 7
-                    elif pos[0] >= self.boardWidth/9 * 8 and pos[0]  <= self.boardWidth/9 *9:
-                        col = 8
-                    print(col)
-                    if pos[1] < self.boardHeight/9:
-                        row = 0
-                    elif pos[1] >= self.boardHeight/9 * 1 and pos[1]  < self.boardHeight/9 *2:
-                        row = 1
-                    elif pos[1] >= self.boardHeight/9 * 2 and pos[1]  < self.boardHeight/9 *3:
-                        row = 2
-                    elif pos[1] >= self.boardHeight/9 * 3 and pos[1]  < self.boardHeight/9 *4:
-                        row = 3
-                    elif pos[1] >= self.boardHeight/9 * 4 and pos[1]  < self.boardHeight/9 *5:
-                        row = 4
-                    elif pos[1] >= self.boardHeight/9 * 5 and pos[1]  < self.boardHeight/9 *6:
-                        row = 5
-                    elif pos[1] >= self.boardHeight/9 * 1 and pos[1]  < self.boardHeight/9 *7:
-                        row = 6
-                    elif pos[1] >= self.boardHeight/9 * 7 and pos[1]  < self.boardHeight/9 *8:
-                        row = 7
-                    elif pos[1] >= self.boardHeight/9 * 8 and pos[1]  <= self.boardHeight/9 *9:
-                        row = 8
-                    print(row)
+                    if pos[0] <= 600:
+                        col = int(pos[0] // (self.boardWidth/9))
+                        row = int(pos[1] // (self.boardHeight/9))
+                        self.drawSquare(self.board.getSquare((row,col)))
+                        self.board.selectSquare((row,col))
+                        self.focusSquare = (row,col)
+                        
+
                 elif event.type == pygame.VIDEORESIZE:
                     self.screen = pygame.display.set_mode((self.screen.get_width(),self.screen.get_height()), pygame.RESIZABLE)
                     self.screen.blit(boardImg, (0,0))
-                    pygame.display.update()
+            pygame.display.update()        
 
 
 arr = [
@@ -164,7 +139,7 @@ arr = [
 
 
 
-test = Board(arr)
+test = Suduko(arr)
 suduko = SudukoGUI(test)
 
 # test.printBoard()
@@ -174,3 +149,4 @@ suduko = SudukoGUI(test)
 
 pygame.quit()
                   
+
