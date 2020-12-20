@@ -53,7 +53,9 @@ class SudukoGUI():
         pygame.init()
         self.running = True
         self.board = board
-        self.windowSize = self.width, self.height = (900, 600)
+        self.windowSize = (900, 600)
+        self.boardWidth = 600
+        self.boardHeight = 600
         self.screen = pygame.display.set_mode(self.windowSize)
         self.screen.blit(boardImg, (0,0))
         self.font = pygame.font.Font('freesansbold.ttf', 50)
@@ -90,6 +92,47 @@ class SudukoGUI():
                     self.drawBoard()
                 elif event.type == pygame.MOUSEBUTTONDOWN:
                     pos = pygame.mouse.get_pos()
+                    print(pos)
+                    row = -1
+                    col = -1
+                    if pos[0] < self.boardWidth/9:
+                        col = 0
+                    elif pos[0] >= self.boardWidth/9 * 1 and pos[0]  < self.boardWidth/9 *2:
+                        col = 1
+                    elif pos[0] >= self.boardWidth/9 * 2 and pos[0]  < self.boardWidth/9 *3:
+                        col = 2
+                    elif pos[0] >= self.boardWidth/9 * 3 and pos[0]  < self.boardWidth/9 *4:
+                        col = 3
+                    elif pos[0] >= self.boardWidth/9 * 4 and pos[0]  < self.boardWidth/9 *5:
+                        col = 4
+                    elif pos[0] >=self.boardWidth/9 * 5 and pos[0]  < self.boardWidth/9 *6:
+                        col = 5
+                    elif pos[0] >= self.boardWidth/9 * 1 and pos[0]  < self.boardWidth/9 *7:
+                        col = 6
+                    elif pos[0] >= self.boardWidth/9 * 7 and pos[0]  < self.boardWidth/9 *8:
+                        col = 7
+                    elif pos[0] >= self.boardWidth/9 * 8 and pos[0]  <= self.boardWidth/9 *9:
+                        col = 8
+                    print(col)
+                    if pos[1] < self.boardHeight/9:
+                        row = 0
+                    elif pos[1] >= self.boardHeight/9 * 1 and pos[1]  < self.boardHeight/9 *2:
+                        row = 1
+                    elif pos[1] >= self.boardHeight/9 * 2 and pos[1]  < self.boardHeight/9 *3:
+                        row = 2
+                    elif pos[1] >= self.boardHeight/9 * 3 and pos[1]  < self.boardHeight/9 *4:
+                        row = 3
+                    elif pos[1] >= self.boardHeight/9 * 4 and pos[1]  < self.boardHeight/9 *5:
+                        row = 4
+                    elif pos[1] >= self.boardHeight/9 * 5 and pos[1]  < self.boardHeight/9 *6:
+                        row = 5
+                    elif pos[1] >= self.boardHeight/9 * 1 and pos[1]  < self.boardHeight/9 *7:
+                        row = 6
+                    elif pos[1] >= self.boardHeight/9 * 7 and pos[1]  < self.boardHeight/9 *8:
+                        row = 7
+                    elif pos[1] >= self.boardHeight/9 * 8 and pos[1]  <= self.boardHeight/9 *9:
+                        row = 8
+                    print(row)
                 elif event.type == pygame.VIDEORESIZE:
                     self.screen = pygame.display.set_mode((self.screen.get_width(),self.screen.get_height()), pygame.RESIZABLE)
                     self.screen.blit(boardImg, (0,0))
