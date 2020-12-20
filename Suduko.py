@@ -23,12 +23,12 @@ class GridSquare():
         return str(self.num)
 
 class Board():
-    def __init__(self):
+    def __init__(self, board):
         self.boardState = []
-        for row in range(9):
+        for row in range(len(board)):
             rowToAdd = []
-            for col in range(9):
-                rowToAdd.append(GridSquare((col, row),0))
+            for col in range(len(board[0])):
+                rowToAdd.append(GridSquare((col, row),board[row][col]))
             self.boardState.append(rowToAdd)
 
 
@@ -54,7 +54,7 @@ class SudukoGUI():
         self.running = True
         self.board = board
         self.windowSize = self.width, self.height = (900, 600)
-        self.screen = pygame.display.set_mode(self.windowSize, pygame.RESIZABLE)
+        self.screen = pygame.display.set_mode(self.windowSize)
         self.screen.blit(boardImg, (0,0))
         self.font = pygame.font.Font('freesansbold.ttf', 50)
         pygame.display.update()
@@ -96,7 +96,7 @@ class SudukoGUI():
                     pygame.display.update()
 
 
-testBoard = [
+arr = [
     [7,8,0,4,0,0,1,2,0],
     [6,0,0,0,7,5,0,0,9],
     [0,0,0,6,0,1,0,7,8],
@@ -108,21 +108,22 @@ testBoard = [
     [0,4,9,2,0,6,0,0,7]
 ]
     
-class Suduko():
-    def __init__(self, board):
-        self.board = []
-        for row in range(9):
-            rowToAdd = []
-            for col in range(9):
-                rowToAdd.append(board[row][col])
-            self.board.append(rowToAdd)
+# class Suduko():
+#     def __init__(self, board):
+#         self.board = []
+#         for row in range(9):
+#             rowToAdd = []
+#             for col in range(9):
+#                 rowToAdd.append(board[row][col])
+#             self.board.append(rowToAdd)
 
-gameOf = Suduko(testBoard)
     
 
 
 
-test = Board()
+test = Board(arr)
+suduko = SudukoGUI(test)
+
 # test.printBoard()
 # test.setSquare((8,8), 9)
 # test.printBoard()
