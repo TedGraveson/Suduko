@@ -1,17 +1,17 @@
 import pygame
-import os
+from pygame.constants import RESIZABLE
 
 
 boardImg = pygame.image.load("SudokuBoard900.jpg")
+boardImg = pygame.transform.scale(boardImg, (600, 600))
 class GridSquare():
     def __init__(self, pos, num):
-        self.row = pos[0]
-        self.col = pos[1]
+        self.pos = pos
         self.num = num
         self.selected = False
 
     def getPos(self):
-        return (self.row, self.col)
+        return self.pos
 
     def getNum(self):
         return self.num
@@ -28,7 +28,7 @@ class Board():
         for row in range(9):
             rowToAdd = []
             for col in range(9):
-                rowToAdd.append(GridSquare((col, row), 8))
+                rowToAdd.append(GridSquare((col, row),0))
             self.boardState.append(rowToAdd)
 
 
@@ -40,42 +40,46 @@ class Board():
         print()
 
     #Addressed from left right 
-    def setPos(self, pos, num) :
-        x = pos[1]-1
-        y = pos[0]-1
-        self.boardState[y][x].setNum(num)
+    def setSquare(self, pos, num) :
+        self.boardState[pos[0]][pos[1]].setNum(num)
 
     def getSquare(self, pos):
         return self.boardState[pos[0]][pos[1]]
 
 
-class Suduko():
+
+class SudukoGUI():
     def __init__(self, board):
         pygame.init()
         self.running = True
         self.board = board
-        self.windowSize = self.width, self.height = (900, 900)
-        self.screen = pygame.display.set_mode(self.windowSize)
+        self.windowSize = self.width, self.height = (900, 600)
+        self.screen = pygame.display.set_mode(self.windowSize, pygame.RESIZABLE)
         self.screen.blit(boardImg, (0,0))
-        self.font = pygame.font.Font('freesansbold.ttf', 100)
+        self.font = pygame.font.Font('freesansbold.ttf', 50)
         pygame.display.update()
         self.startGame()
 
     
-    def updateBoard(self):
+    def drawBoard(self):
         for col in range(9):
             for row in range(9):
-                self.drawPos(self.board.getSquare((row, col)))
-
-    def drawPos(self, gridSquare):
-        print(gridSquare.getNum)
-        square = self.font.render(str(gridSquare.getNum()), False, (0,0,0))
-        xPos = gridSquare.getPos()[0] *100 + 25
-        yPos = gridSquare.getPos()[1] *100 + 10
-        print(xPos)
-        print(yPos)
-        self.screen.blit(square, (xPos, yPos))
+                self.drawSquare(self.board.getSquare((row, col)))
         pygame.display.update()
+
+    def drawSquare(self, gridSquare):
+        #Number to be drawn
+        square = self.font.render(str(gridSquare.getNum()), False, (0,0,0))
+        print(gridSquare.getPos()[0])
+        print(gridSquare.getPos()[1])
+        print(self.windowSize[0]/3)
+        boardWidth = self.windowSize[0]-(self.windowSize[0]/3)
+        boardHeight = self.windowSize[1]
+        xPos = boardWidth/9 * gridSquare.getPos()[1]
+        yPos = boardHeight/9 * gridSquare.getPos()[0]
+        self.screen.blit(square, (xPos, yPos))
+        
+        
 
     def startGame(self):
         while self.running :
@@ -83,25 +87,46 @@ class Suduko():
                 if event.type == pygame.QUIT:
                     self.running = False
                 elif event.type == pygame.KEYDOWN:
-                    if event.key == py
-                    self.updateBoard()
+                    self.drawBoard()
                 elif event.type == pygame.MOUSEBUTTONDOWN:
                     pos = pygame.mouse.get_pos()
-                    if(pos[0] < 100):
-                        self.v
-                    elif(pos[0] < 200):
+                elif event.type == pygame.VIDEORESIZE:
+                    self.screen = pygame.display.set_mode((self.screen.get_width(),self.screen.get_height()), pygame.RESIZABLE)
+                    self.screen.blit(boardImg, (0,0))
+                    pygame.display.update()
 
 
+testBoard = [
+    [7,8,0,4,0,0,1,2,0],
+    [6,0,0,0,7,5,0,0,9],
+    [0,0,0,6,0,1,0,7,8],
+    [0,0,7,0,4,0,2,6,0],
+    [0,0,1,0,5,0,9,3,0],
+    [9,0,4,0,6,0,0,0,5],
+    [0,7,0,3,0,0,0,1,2],
+    [1,2,0,0,0,7,4,0,0],
+    [0,4,9,2,0,6,0,0,7]
+]
+    
+class Suduko():
+    def __init__(self, board):
+        self.board = []
+        for row in range(9):
+            rowToAdd = []
+            for col in range(9):
+                rowToAdd.append(board[row][col])
+            self.board.append(rowToAdd)
+
+gameOf = Suduko(testBoard)
     
 
 
 
 test = Board()
-test.printBoard()
-test.setPos((9,9), 9)
-test.printBoard()
+# test.printBoard()
+# test.setSquare((8,8), 9)
+# test.printBoard()
 
 
-game = Suduko(test)
 pygame.quit()
                   
