@@ -1,11 +1,9 @@
 import pygame
 import Suduko
 
-boardImg = pygame.image.load("SudokuBoard900.jpg")
-boardImg = pygame.transform.scale(boardImg, (600, 600))
-
 white = (255,255,255)
 black = (0, 0, 0)
+
 class SudukoGUI():
     def __init__(self, suduko):
         pygame.init()
@@ -19,7 +17,8 @@ class SudukoGUI():
         self.screen = pygame.display.set_mode(self.windowSize)
         self.font = pygame.font.Font('freesansbold.ttf', 50)
         self.selected = None
-        self.drawBoard()        
+        self.drawBoard() 
+        self.updateBoard()       
         self.startGame()
 
     
@@ -58,6 +57,7 @@ class SudukoGUI():
 
     def selectSquare(self, pos):
         if(self.selected != pos):
+            self.drawBoard()
             self.selected = pos
             highlight = pygame.Surface((self.boardWidth/9 -1, self.boardHeight/9-1))
             highlight.set_alpha(128)
@@ -66,8 +66,13 @@ class SudukoGUI():
             yPos = (self.selected[1] * self.squareSize)+1
             self.screen.blit(highlight, (xPos, yPos))
 
+    def setSelected(self, num):
+        self.board[self.selected[0]][self.selected[1]] = num
 
-
+    def updateBoard(self):
+        pygame.display.update()
+        self.drawBoard()
+        
 
     def startGame(self):
         while self.running :
@@ -95,16 +100,17 @@ class SudukoGUI():
                     elif event.key == pygame.K_9:
                         num = 9
                     if num != None:
-                        pass
+                        self.setSelected(num)
+                        self.updateBoard()
                 elif event.type == pygame.MOUSEBUTTONDOWN:
                     pos = pygame.mouse.get_pos()
                     if pos[0] <= 600:
                         col = int(pos[1] // (self.boardWidth/9))
                         row = int(pos[0] // (self.boardHeight/9))
-                        self.drawBoard()
                         self.selectSquare((row,col))
+                        self.updateBoard()
                         
-            pygame.display.update()
+            
 
 arr = [
     [7,8,0,4,0,0,1,2,0],
