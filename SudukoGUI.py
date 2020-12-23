@@ -1,6 +1,11 @@
 import pygame
 import Suduko
 
+boardImg = pygame.image.load("SudokuBoard900.jpg")
+boardImg = pygame.transform.scale(boardImg, (600, 600))
+
+white = (255,255,255)
+black = (0, 0, 0)
 class SudukoGUI():
     def __init__(self, suduko):
         pygame.init()
@@ -9,38 +14,60 @@ class SudukoGUI():
         self.windowSize = (900, 600)
         self.boardWidth = 600
         self.boardHeight = 600
+        self.squareSize = self.boardWidth/9
+        self.font =  pygame.font.SysFont("comicsans", 40)
         self.screen = pygame.display.set_mode(self.windowSize)
         self.font = pygame.font.Font('freesansbold.ttf', 50)
-        self.focusSquare = (0,0)
-        self.drawBoard()
+        self.selected = None
+        self.drawBoard()        
+        self.startGame()
 
     
     def drawBoard(self):
-        self.screen.blit(boardImg, (0,0))
-        for col in range(9):
-            for row in range(9):
-                if self.board.getSquare((row,col)).getNum() != 0:
-                    self.drawSquare(self.board.getSquare((row, col)))
-        self.showFocus()
-        pygame.display.update()
+        self.screen.fill(white)
+        squareSize = self.boardWidth/9
+        thicc = 1
+        for x in range(len(self.board)+1):
+            #Thicker lines for boxes
+            if(x%3 == 0 and x!= 0):
+                thicc = 3
+            else:
+                thicc = 1
+            print("yo")
+            pygame.draw.line(self.screen, black,(0, x*squareSize), (600, x*squareSize),thicc)
+
+        for x in range(len(self.board[0])+1):
+            if(x % 3 == 0 and x!= 0):
+                thicc = 3
+            else:
+                thicc = 1
+            pygame.draw.line(self.screen, black, (x*squareSize, 0), (x*squareSize, 600), thicc)
+        
+        font = pygame.font.SysFont("comicsans", 40)
+
+        for row in range(len(self.board)):
+            for col in range(len(self.board[0])):
+                txt = font.render(str(self.board[row][col]), False, black)
+                # self.screen.blit(txt, ((gap * row),(gap*col) ))
+                #To center numbers, top left will be middle of grid square minus
+                #half of number with
+                xPos = (squareSize*row)+ (squareSize/2 - txt.get_width()/2)
+                yPos = (squareSize *col) + (squareSize/2 - txt.get_height()/2)
+                self.screen.blit(txt, (xPos, yPos))
 
 
-    def drawSquare(self, gridSquare):
-        #Number to be drawn
-        square = self.font.render(str(gridSquare.getNum()), False, (0,0,0))
-        boardWidth = self.windowSize[0]-(self.windowSize[0]/3)
-        boardHeight = self.windowSize[1]
-        row = boardWidth/9 * gridSquare.getPos()[0]
-        col = boardHeight/9 * gridSquare.getPos()[1]
-        self.screen.blit(square, (row, col))
+    def selectSquare(self, pos):
+        if(self.selected != pos):
+            self.selected = pos
+            highlight = pygame.Surface((self.boardWidth/9 -1, self.boardHeight/9-1))
+            highlight.set_alpha(128)
+            highlight.fill((255,255,153))
+            xPos = (self.selected[0] * self.squareSize)+1
+            yPos = (self.selected[1] * self.squareSize)+1
+            self.screen.blit(highlight, (xPos, yPos))
 
-    def showFocus(self):
-        highlight = pygame.Surface((self.boardWidth/9, self.boardHeight/9))
-        highlight.set_alpha(128)
-        highlight.fill((255,255,153))
-        rowPos = self.boardWidth/9 * self.focusSquare[0]
-        colPos = self.boardHeight/9* self.focusSquare[1]
-        self.screen.blit(highlight, (rowPos+1,colPos+1))
+
+
 
     def startGame(self):
         while self.running :
@@ -68,20 +95,44 @@ class SudukoGUI():
                     elif event.key == pygame.K_9:
                         num = 9
                     if num != None:
-                        if(self.board.checkMove(self.focusSquare, num)):
-                            self.board.setSquare(self.focusSquare, num)                
-                            self.drawBoard()
+                        pass
                 elif event.type == pygame.MOUSEBUTTONDOWN:
                     pos = pygame.mouse.get_pos()
                     if pos[0] <= 600:
                         col = int(pos[1] // (self.boardWidth/9))
                         row = int(pos[0] // (self.boardHeight/9))
-                        self.board.selectSquare((row,col))
-                        self.focusSquare = (row,col)
                         self.drawBoard()
+                        self.selectSquare((row,col))
                         
+            pygame.display.update()
 
-                elif event.type == pygame.VIDEORESIZE:
-                    self.screen = pygame.display.set_mode((self.screen.get_width(),self.screen.get_height()), pygame.RESIZABLE)
-                    self.screen.blit(boardImg, (0,0))
-            pygame.display.update()    
+arr = [
+    [7,8,0,4,0,0,1,2,0],
+    [6,0,0,0,7,5,0,0,9],
+    [0,0,0,6,0,1,0,7,8],
+    [0,0,7,0,4,0,2,6,0],
+    [0,0,1,0,5,0,9,3,0],
+    [9,0,4,0,6,0,0,0,5],
+    [0,7,0,3,0,0,0,1,2],
+    [1,2,0,0,0,7,4,0,0],
+    [0,4,9,2,0,6,0,0,7]
+]
+gameTest = SudukoGUI(arr)
+
+
+#def drawSquare(self, gridSquare):
+    #     #Number to be drawn
+    #     square = self.font.render(str(gridSquare.getNum()), False, (0,0,0))
+    #     boardWidth = self.windowSize[0]-(self.windowSize[0]/3)
+    #     boardHeight = self.windowSize[1]
+    #     row = boardWidth/9 * gridSquare.getPos()[0]
+    #     col = boardHeight/9 * gridSquare.getPos()[1]
+    #     self.screen.blit(square, (row, col))
+
+    # def showFocus(self):
+    #     highlight = pygame.Surface((self.boardWidth/9, self.boardHeight/9))
+    #     highlight.set_alpha(128)
+    #     highlight.fill((255,255,153))
+    #     rowPos = self.boardWidth/9 * self.selected[0]
+    #     colPos = self.boardHeight/9* self.selected[1]
+    #     self.screen.blit(highlight, (rowPos+1,colPos+1))
