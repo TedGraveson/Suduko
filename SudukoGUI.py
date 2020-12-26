@@ -242,9 +242,11 @@ class SudukoGUI():
             attempt = self.sketches.pop(self.selected)
             #If attempt matches solution, set board position to attempt
             if(attempt == self.solution[self.selected[0]][self.selected[1]]):
+                self.game_status = "Correct"
                 self.board[self.selected[0]][self.selected[1]] = attempt
                 self.selected = None
             else:
+                self.game_status = "Incorrect"
                 self.errors +=1        
 
     def draw_game_screen(self, start_time):
