@@ -1,75 +1,54 @@
-#prints the state of the board
-def printBoard(board):
-    
-    for row in range(len(board)):
+#Checks if a move is valid
+def check_move(board, pos, num):
+    row = pos[0]
+    col = pos[1]
 
-        if row % 3 == 0 and row != 0:
-            print('- - - - - - - - - - -')
-        
-        for col in range(len(board[0])):
-            
-            if col % 3 == 0 and col != 0:
-                print('|', end=' ')
-                
-            if col == 8:
-                print (board[row][col])
-                
-            else:
-                print(board[row][col], end=' ')
-
-#find the next empty space on the board
-def emptySpace(board):
-    for row in range(len(board)):
-        for col in range(len(board[0])):
-            if board[row][col] == 0:
-                return(row,col) #returns tuple
-
-    return None
-
-                         
-
-#checks if a move is valid    
-def checkMove(pos, num, board):
-
-    #row
-    for col in range(len(board[0])):
-        if board[pos[0]][col] == num:
+    #Check row
+    for check in board[row]:
+        if check == num:
             return False
-    #col
-    for y in range(len(board)):
-        if board[y][pos[1]] == num:
+    
+
+    #Check col
+    for check in range(9):
+        if board[check][col] == num:
             return False
 
-    #counts from top left index of box that number is being placed in
-    boxRow = (pos[0] // 3)*3 
-    boxCol = (pos[1] // 3)*3
-    
-    #box
-    for row in range(boxRow, boxRow+3):
-        for col in range(boxCol, boxCol+3):
-            if board[row][col] == num:
+    #Check box
+    start_row = (row // 3 ) * 3
+    start_col = (col // 3) *3
+    for x in range(start_row, start_row+3):
+        for y in range(start_col, start_col+3):
+            if board[x][y] == num:
                 return False
-
-    return True
     
-def solve(board):
+    return True
 
-    solveSpace = emptySpace(board)
+#Find next 0 in board
+def next_blank(board):
+    for row in range(9):
+        for col in range(9):
+            if board[row][col] == 0:
+                return row, col
+    return None
+#Solves the board using backtracking algorithm
+def solve_board(board):
+    grid_square = next_blank(board)
 
-    #base case
-    if solveSpace == None:
+    #Base case, board is solved
+    if grid_square == None:
         return True
-    else:
-        row = solveSpace[0]
-        col = solveSpace[1]
 
+    else:
+        #Try every number from 1-9
         for num in range(1,10):
-            #if number is valid, recursively fill board
-            if checkMove(solveSpace, num, board) == True:
-                board[row][col] = num
-                solve(board)
-                #if board solved, leave it as it
-                if solve(board) == True:
+            #If valid move, try this path to a solution
+            if check_move(board, grid_square, num):
+                board[grid_square[0]][grid_square[1]] = num
+                #All branches return true in a valid solution
+                if(solve_board(board)):
                     return True
-            #if no solutions possible down this branch, revert back to root
-            board[row][col]=0
+                #Else reset squares for another path
+                board[grid_square[0]][grid_square[1]] = 0
+        #No solutions possible in current state
+        return False
