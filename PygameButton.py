@@ -1,5 +1,6 @@
 import pygame
 
+#Button objects to be displayed to screen
 class Button():
     def __init__(self, pos, width, height, colour, text = "", filled = 0, action = None):
         self.pos = pos

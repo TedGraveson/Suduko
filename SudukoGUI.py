@@ -88,6 +88,7 @@ class SudukoGUI():
         #Stats
         self.errors = 0
         self.hints = 3
+        self.clock_time = ""
 
     def title_screen(self):
         self.board = None
@@ -97,8 +98,8 @@ class SudukoGUI():
             Button((150, board_select_y), 180, 100, WHITE, "Board 1", 0, lambda: self.set_board(0)),
             Button((150 + 180 + button_gap, board_select_y), 180, 100, WHITE, "Board 2", 0, lambda: self.set_board(1)),
             Button((150 + (180 + button_gap) * 2, board_select_y), 180, 100, WHITE, "Board 3", 0, lambda: self.set_board(2)),
-            Button((150, 300 + button_gap), 600, 100, WHITE, "Custom Board", 0, lambda: self.set_board(3)),
-            Button((150, 400 + 2*(button_gap)), 600, 100, WHITE, "Start", 0, self.start_game)
+            Button((150, 300 + button_gap), 600, 100, WHITE, "Start", 0, self.start_game),
+            Button((150, 400 + (2* button_gap)), 600, 100, WHITE, "Quit", 0, self.stop_game )
         ]
 
         while self.running:
@@ -156,7 +157,7 @@ class SudukoGUI():
         self.screen.fill(WHITE)
         thicc = 1
         length = 600
-        for x in range(len(self.board)+1):
+        for x in range(10):
             #Thicker lines for boxes
             if(x%3 == 0 and x!= 0):
                 thicc = 3
@@ -166,7 +167,7 @@ class SudukoGUI():
                 length = 600
             pygame.draw.line(self.screen, BLACK,(0, x*SQUARE_SIZE), (length, x*SQUARE_SIZE),thicc)
 
-        for x in range(len(self.board[0])+1):
+        for x in range(10):
             if(x % 3 == 0 and x!= 0):
                 thicc = 3
             else:
@@ -178,22 +179,23 @@ class SudukoGUI():
         
     #Draws all numbers inside squares
     def fill_squares(self):
-        for row in range(len(self.board)):
-            for col in range(len(self.board[0])):
-                if(self.board[row][col] != 0):
-                    number = self.font.render(str(self.board[row][col]), True, BLACK)
-                    #To center numbers, top left will be middle of grid square minus
-                    #half of number with
-                    xPos = (SQUARE_SIZE*col)+ (SQUARE_SIZE/2 - number.get_width()/2)
-                    yPos = (SQUARE_SIZE *row) + (SQUARE_SIZE/2 - number.get_height()/2)
-                    self.screen.blit(number, (xPos, yPos))
-        
-        #Draws numbers that are not finalized
-        for sketchedNum in self.sketches:
-            number = self.font.render(str(self.sketches[sketchedNum]), True, (128,128,128))
-            xPos = (SQUARE_SIZE* sketchedNum[1] )+ (SQUARE_SIZE/2 - number.get_width()/2)
-            yPos = (SQUARE_SIZE *sketchedNum[0]) + (SQUARE_SIZE/2 - number.get_height()/2)
-            self.screen.blit(number, (xPos, yPos))
+        if self.board != None:
+            for row in range(9):
+                for col in range(9):
+                    if(self.board[row][col] != 0):
+                        number = self.font.render(str(self.board[row][col]), True, BLACK)
+                        #To center numbers, top left will be middle of grid square minus
+                        #half of number with
+                        xPos = (SQUARE_SIZE*col)+ (SQUARE_SIZE/2 - number.get_width()/2)
+                        yPos = (SQUARE_SIZE *row) + (SQUARE_SIZE/2 - number.get_height()/2)
+                        self.screen.blit(number, (xPos, yPos))
+            
+            #Draws numbers that are not finalized
+            for sketchedNum in self.sketches:
+                number = self.font.render(str(self.sketches[sketchedNum]), True, (128,128,128))
+                xPos = (SQUARE_SIZE* sketchedNum[1] )+ (SQUARE_SIZE/2 - number.get_width()/2)
+                yPos = (SQUARE_SIZE *sketchedNum[0]) + (SQUARE_SIZE/2 - number.get_height()/2)
+                self.screen.blit(number, (xPos, yPos))
 
     #Draws yellow highlight over clicked square
     def draw_selected(self):
@@ -212,11 +214,13 @@ class SudukoGUI():
 
     #Updates clock to screen
     def draw_stats(self, start_time):
-        currentTime = round(time.time()-start_time)
-        seconds = currentTime % 60
-        minutes = currentTime // 60
-        text = str(minutes) + " : " + str(seconds)
-        clock = self.font.render(text, True, BLACK)
+        if self.game_status != "Solved":
+            currentTime = round(time.time()-start_time)
+            seconds = currentTime % 60
+            minutes = currentTime // 60
+            self.clock_time =  str(minutes) + " : " + str(seconds)
+            
+        clock = self.font.render(self.clock_time, True, BLACK)
         xPos = (600+150)- (clock.get_width()/2)
         yPos = (450)- (clock.get_height()/2)
         self.screen.blit(clock, (xPos, yPos))
@@ -254,8 +258,7 @@ class SudukoGUI():
         self.fill_squares()
         self.draw_selected()
         self.draw_buttons()
-        if not self.creating:
-            self.draw_stats(start_time)
+        self.draw_stats(start_time)
         pygame.display.update()
         
     #User input taken before number is checked against solution    
@@ -275,8 +278,9 @@ class SudukoGUI():
     def create_board(self, board):
         self.board = board
 
-    def stop(self):
-        self.creating = False
+    def stop_game(self):
+        self.running= False
+
     def start_game(self):
         #Board must be selected
         if self.board!= None:             
@@ -286,9 +290,13 @@ class SudukoGUI():
                 Button((620, 240), 260, 100, BLACK, "Menu", 1, self.title_screen)
             ]
             start_time = time.time()
+            self.selected = None
+            self.sketches = dict()
             self.game_status = "Not solved"
             self.solution = deepcopy(self.board)
             SudukoSolver.solve_board(self.solution)
+
+            #Main game loop
             while self.running :
                 num = None
                 for event in pygame.event.get():
