@@ -2,87 +2,32 @@ import pygame, SudukoSolver, time
 from pygame.constants import MOUSEBUTTONDOWN, MOUSEMOTION
 from PygameButton import Button
 from copy import deepcopy
-
-#Colours
-WHITE = (255,255,255)
-BLACK = (0, 0, 0)
-RED = (255, 0, 0)
-YELLOW = (255,255,153)
-
-#Board Dimensions
-BOARD_WIDTH = 600
-BOARD_HEIGHT = 600
-SQUARE_SIZE = 600/9
-
-#Game Constants
-WINDOW_SIZE = (900, 600)
-FPS = 30
-board_one = [
-    [7,8,0,4,0,0,1,2,0],
-    [6,0,0,0,7,5,0,0,9],
-    [0,0,0,6,0,1,0,7,8],
-    [0,0,7,0,4,0,2,6,0],
-    [0,0,1,0,5,0,9,3,0],
-    [9,0,4,0,6,0,0,0,5],
-    [0,7,0,3,0,0,0,1,2],
-    [1,2,0,0,0,7,4,0,0],
-    [0,4,9,2,0,6,0,0,7]
-]
-board_two = [
-    [0,4,0,8,0,5,2,0,0],
-    [0,2,0,0,4,0,0,5,0],
-    [5,0,0,0,0,0,0,0,4],
-    [0,9,0,0,0,3,1,2,0],
-    [1,0,6,0,7,8,0,0,3],
-    [3,7,0,9,0,4,0,8,0],
-    [0,0,0,0,0,6,7,0,0],
-    [0,0,8,3,5,9,0,1,0],
-    [0,1,9,0,0,7,6,0,0]
-]
-
-board_three = [
-    [9,8,0,0,0,0,6,0,2],
-    [0,0,7,0,4,0,0,0,0],
-    [0,1,0,0,0,0,0,0,9],
-    [5,6,0,4,0,0,0,0,0],
-    [0,0,0,0,0,1,7,0,0],
-    [0,0,8,0,6,0,4,1,0],
-    [0,0,2,0,0,0,1,0,0],
-    [0,4,5,8,0,0,0,0,6],
-    [0,0,0,0,0,7,2,0,0]
-]
-
-board_custom = [
-    [0,0,0,0,0,0,0,0,0],
-    [0,0,0,0,0,0,0,0,0],
-    [0,0,0,0,0,0,0,0,0],
-    [0,0,0,0,0,0,0,0,0],
-    [0,0,0,0,0,0,0,0,0],
-    [0,0,0,0,0,0,0,0,0],
-    [0,0,0,0,0,0,0,0,0],
-    [0,0,0,0,0,0,0,0,0],
-    [0,0,0,0,0,0,0,0,0]
-]
-SUDUKO_BOARDS = [board_one, board_two, board_three, board_custom]
+from Constants import *
+#Running the GUI
 
 #GUI for Suduko game
 class SudukoGUI():
     def __init__(self):
         pygame.init()
         self.running = True
+        #Current board selected
         self.board = None
+        #Buttons currently displayed
         self.buttons = []
+
+        #Pygame values
         self.font =  pygame.font.SysFont("comicsans", 40)
         self.title_font = pygame.font.SysFont("helvetica", 100)
         self.screen = pygame.display.set_mode(WINDOW_SIZE)
         self.fps_limit = pygame.time.Clock()
+
+        #Game message
         self.game_status = "Not solved"
 
         #Current square being manipulated
         self.selected = None
-        self.creating = False
 
-        #Numbers not yet finalized
+        #Numbers not yet finalized, inputted by user
         self.sketches = dict()
 
         #Stats
@@ -90,49 +35,7 @@ class SudukoGUI():
         self.hints = 3
         self.clock_time = ""
 
-    def title_screen(self):
-        self.board = None
-        board_select_y = 200
-        button_gap = 30
-        self.buttons = [
-            Button((150, board_select_y), 180, 100, WHITE, "Board 1", 0, lambda: self.set_board(0)),
-            Button((150 + 180 + button_gap, board_select_y), 180, 100, WHITE, "Board 2", 0, lambda: self.set_board(1)),
-            Button((150 + (180 + button_gap) * 2, board_select_y), 180, 100, WHITE, "Board 3", 0, lambda: self.set_board(2)),
-            Button((150, 300 + button_gap), 600, 100, WHITE, "Start", 0, self.start_game),
-            Button((150, 400 + (2* button_gap)), 600, 100, WHITE, "Quit", 0, self.stop_game )
-        ]
-
-        while self.running:
-            self.fps_limit.tick(FPS)
-            for event in pygame.event.get():
-                pos = pygame.mouse.get_pos()
-                if event.type == pygame.QUIT:
-                    self.running = False
-                if event.type == MOUSEMOTION:
-                    #Button text bigger when moused over
-                    for btn in self.buttons:
-                        if btn.mouseHover(pos):
-                            btn.font = pygame.font.SysFont("comicsans", 45)
-                        else:
-                            btn.font= pygame.font.SysFont("comicsans", 40)
-                if event.type == MOUSEBUTTONDOWN:
-                    for btn in self.buttons:
-                        if btn.mouseHover(pos):
-                            btn.click()
-                            #Board selected will be highlighted yellow
-                            for clicked in self.buttons:
-                                if clicked == btn and btn.text!="Start":
-                                    clicked.colour = YELLOW
-                                else:
-                                    clicked.colour = WHITE                    
-            self.draw_title_screen()
-
-    def draw_title_screen(self):
-        self.screen.fill(BLACK)
-        title = self.title_font.render("Suduko Solver!", True, WHITE)
-        self.screen.blit(title, (WINDOW_SIZE[0]/2-title.get_width()/2, (WINDOW_SIZE[1]/2-title.get_height()/2)-200))
-        self.draw_buttons()
-        pygame.display.update()
+    
 
     def set_board(self, board_index):
         self.board = SUDUKO_BOARDS[board_index]
@@ -210,7 +113,7 @@ class SudukoGUI():
     #Draws all buttons to screen
     def draw_buttons(self):
         for btn in self.buttons:
-            btn.drawButton(self.screen)
+            btn.draw_button(self.screen)
 
     #Updates clock to screen
     def draw_stats(self, start_time):
@@ -280,6 +183,62 @@ class SudukoGUI():
 
     def stop_game(self):
         self.running= False
+    
+    #Title screen for the game
+    def title_screen(self):
+        self.board = None
+        board_button_y_pos = 200
+        #Change in x position from previous board button
+        button_gap = 210
+
+        self.buttons = [
+            #Board selecting buttons
+            Button((150, board_button_y_pos), 180, 100, YELLOW, "Board 1", 0, lambda: self.set_board(0)),
+            Button((150 + button_gap, board_button_y_pos), 180, 100, WHITE, "Board 2", 0, lambda: self.set_board(1)),
+            Button((150 + button_gap * 2, board_button_y_pos), 180, 100, WHITE, "Board 3", 0, lambda: self.set_board(2)),
+
+            #Start and quit buttons
+            Button((150, 300 + 30), 600, 100, WHITE, "Start", 0, self.start_game),
+            Button((150, 400 + 2 * 30), 600, 100, WHITE, "Quit", 0, self.stop_game )
+        ]
+
+        #First board is default
+        self.buttons[0].click()
+
+        #Title screen running loop
+        while self.running:
+            self.fps_limit.tick(FPS)
+            for event in pygame.event.get():
+                pos = pygame.mouse.get_pos()
+                if event.type == pygame.QUIT:
+                    self.running = False
+                if event.type == MOUSEMOTION:
+                    #Button text bigger when moused over
+                    for btn in self.buttons:
+                        if btn.mouseHover(pos):
+                            btn.font = pygame.font.SysFont("comicsans", 45)
+                        else:
+                            btn.font= pygame.font.SysFont("comicsans", 40)
+                if event.type == MOUSEBUTTONDOWN:
+                    for btn in self.buttons:
+                        #If button is clicked, perform function given to button
+                        if btn.mouseHover(pos):
+                            btn.click()
+                            #Board selected will be highlighted yellow
+                            for clicked in self.buttons:
+                                if clicked == btn and btn.text!="Start":
+                                    clicked.colour = YELLOW
+                                else:
+                                    clicked.colour = WHITE                    
+            self.draw_title_screen()
+
+    #Updates title screen elements
+    def draw_title_screen(self):
+        self.screen.fill(BLACK)
+        title = self.title_font.render("Suduko Solver!", True, WHITE)
+        self.screen.blit(title, (WINDOW_SIZE[0]/2-title.get_width()/2, (WINDOW_SIZE[1]/2-title.get_height()/2)-200))
+        self.draw_buttons()
+        pygame.display.update()
 
     def start_game(self):
         #Board must be selected
