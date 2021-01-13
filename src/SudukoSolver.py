@@ -1,4 +1,5 @@
 #This file contains methods to create solutions for valid Suduko puzzles passed as 2-D arrays
+#Solver inspired by https://www.techwithtim.net/tutorials/python-programming/sudoku-solver-backtracking/
 
 #Checks if a move is valid (no other instance of 'num' in respective row, column, and box)
 def check_move(board, pos, num):
