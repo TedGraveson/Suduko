@@ -11,5 +11,5 @@ If a user gets stuck and they have enough hints left, they can press the "Hint" 
 The game ends when the board is solved. This can be done by the user, or pressing the "Solve" button.
 
 ## About the project
-This project was inspired by: https://www.techwithtim.net/tutorials/python-programming/sudoku-solver-backtracking/
+This project was inspired by the YouTube channel Tech With Tim: https://www.youtube.com/channel/UC4JX40jDee_tINbkjycV4Sg
 It was meant as a way to learn python and create GUI elements with the pygame library, as well as learn an application for the backtracking algorithm.
