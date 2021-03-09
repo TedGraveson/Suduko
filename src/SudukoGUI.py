@@ -273,7 +273,6 @@ class SudukoGUI():
                     elif event.type == pygame.KEYDOWN and self.selected!= None:
                         #Try sketch against board solution
                         if event.key == pygame.K_RETURN:
-                            print(self.sketches.get(self.selected))
                             self.try_square()
                         #Delete sketch
                         elif event.key == pygame.K_DELETE:
