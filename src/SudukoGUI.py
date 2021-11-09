@@ -84,7 +84,7 @@ class SudukoGUI():
 
 
         #Score divider
-        pygame.draw.line(self.screen, BLACK, (620, 480), (880, 480), 2)
+        # pygame.draw.line(self.screen, BLACK, (620, 580), (880, 580), 2)
         
     #Draws all numbers inside squares
     def fill_squares(self):
@@ -134,7 +134,7 @@ class SudukoGUI():
         #Draw clock
         clock = self.font.render(self.clock_time, True, BLACK)
         x_pos = (600+150)- (clock.get_width()/2)
-        y_pos = (450)- (clock.get_height()/2)
+        y_pos = (500)- (clock.get_height()/2)
         self.screen.blit(clock, (x_pos, y_pos))
 
         #Draw errors
@@ -147,7 +147,7 @@ class SudukoGUI():
 
         #Draw current game status
         status = self.font.render(self.game_status, True, BLACK)
-        self.screen.blit(status, (750-status.get_width()/2, 540-status.get_height()/2))
+        self.screen.blit(status, (750-status.get_width()/2, 520))
 
     #Changes square currently selected
     def set_select(self, pos):
